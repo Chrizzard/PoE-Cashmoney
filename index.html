@@ -1,0 +1,397 @@
+<!DOCTYPE html>
+<html lang="en">
+  <head>
+    <meta charset="UTF-8" />
+    <meta http-equiv="X-UA-Compatible" content="IE=edge" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+    <title>Path of Exile</title>
+
+    <link
+      rel="stylesheet"
+      href="https://cdn.jsdelivr.net/npm/bootstrap@5.2.3/dist/css/bootstrap.min.css"
+      integrity="sha384-rbsA2VBKQhggwzxH7pPCaAqO46MgnOM80zW1RWuH61DGLwZJEdK2Kadq2F9CUG65"
+      crossorigin="anonymous"
+    />
+
+    <script
+      src="https://code.jquery.com/jquery-3.7.0.js"
+      integrity="sha256-JlqSTELeR4TLqP0OG9dxM7yDPqX1ox/HfgiSLBj8+kM="
+      crossorigin="anonymous"
+    ></script>
+    <script src="https://unpkg.com/vue@3/dist/vue.global.js"></script>
+
+    <script
+      src="https://cdn.jsdelivr.net/npm/bootstrap@5.2.3/dist/js/bootstrap.bundle.min.js"
+      integrity="sha384-kenU1KFdBIe4zVF0s0G1M5b4hcpxyD9F7jL+jjXkk+Q2h455rYXK/7HAuoJl+0I4"
+      crossorigin="anonymous"
+    ></script>
+
+    <script>
+      function init() {
+        const app = Vue.createApp({
+          data() {
+            return {
+              message: "Hello World!",
+              skillGemApi: [],
+              beastApi: [],
+              divinationApi: [],
+              currencyApi: [],
+              oilApi: [],
+              scarabApi: [],
+              fossilApi: [],
+              essenceApi: [],
+            };
+          },
+          methods: {
+            async getData() {
+              skillGemRes = await fetch(
+                "https://corsproxy.io/?https://poe.ninja/api/data/itemoverview?league=Ancestor&type=SkillGem"
+              );
+              skillGemFinalRes = await skillGemRes.json();
+              this.skillGemApi = skillGemFinalRes.lines;
+
+              beastRes = await fetch(
+                "https://corsproxy.io/?https://poe.ninja/api/data/itemoverview?league=Ancestor&type=Beast"
+              );
+              beastFinalRes = await beastRes.json();
+              this.beastApi = beastFinalRes.lines;
+
+              divinationRes = await fetch(
+                "https://corsproxy.io/?https://poe.ninja/api/data/itemoverview?league=Ancestor&type=DivinationCard"
+              );
+              divinationFinalRes = await divinationRes.json();
+              this.divinationApi = divinationFinalRes.lines;
+
+              currencyRes = await fetch(
+                "https://corsproxy.io/?https://poe.ninja/api/data/currencyoverview?league=Ancestor&type=Currency"
+              );
+              currencyFinalRes = await currencyRes.json();
+              this.currencyApi = currencyFinalRes.lines;
+
+              oilRes = await fetch(
+                "https://corsproxy.io/?https://poe.ninja/api/data/itemoverview?league=Ancestor&type=Oil"
+              );
+              oilFinalRes = await oilRes.json();
+              this.oilApi = oilFinalRes.lines;
+
+              scarabRes = await fetch(
+                "https://corsproxy.io/?https://poe.ninja/api/data/itemoverview?league=Ancestor&type=Scarab"
+              );
+              scarabFinalRes = await scarabRes.json();
+              this.scarabApi = scarabFinalRes.lines;
+
+              fossilRes = await fetch(
+                "https://corsproxy.io/?https://poe.ninja/api/data/itemoverview?league=Ancestor&type=Fossil"
+              );
+              fossilFinalRes = await fossilRes.json();
+              this.fossilApi = fossilFinalRes.lines;
+
+              essenceRes = await fetch(
+                "https://corsproxy.io/?https://poe.ninja/api/data/itemoverview?league=Ancestor&type=Essence"
+              );
+              essenceFinalRes = await essenceRes.json();
+              this.essenceApi = essenceFinalRes.lines;
+            },
+            showData() {
+              console.log(
+                this.beastApi.find((a) => a.name == "Wild Brambleback")
+              );
+            },
+            decimalToFraction(decimal) {
+              // Check if the input is a valid number
+              if (typeof decimal !== "number" || isNaN(decimal)) {
+                return "Invalid input. Please provide a valid number.";
+              }
+
+              // Find the greatest common divisor (GCD) using Euclidean algorithm
+              function findGCD(a, b) {
+                return b ? findGCD(b, a % b) : a;
+              }
+
+              // Multiply the decimal by a power of 10 to get an integer numerator
+              const decimalPart = (decimal.toString().split(".")[1] || "")
+                .length;
+              let numerator = parseInt(decimal * 10 ** decimalPart);
+              let denominator = 10 ** decimalPart;
+
+              // Find the greatest common divisor to simplify the fraction
+              const gcd = findGCD(numerator, denominator);
+
+              // Simplify the fraction by dividing the numerator and denominator by the GCD
+              numerator /= gcd;
+              denominator /= gcd;
+
+              // Return the fraction as a string
+              return `${numerator}/${denominator}`;
+            },
+          },
+          computed: {
+            skillGemTable() {
+              const skillGemApiFormat = this.skillGemApi
+                .filter((a) => a.name.includes("Awakened"))
+                .sort(
+                  (a, b) =>
+                    a.name.localeCompare(b.name) ||
+                    a.gemLevel - b.gemLevel ||
+                    a.divineValue - b.divineValue
+                );
+              const distinctSkillGems = [
+                ...new Set(skillGemApiFormat.map((x) => x.name)),
+              ];
+
+              const beast = this.beastApi.find(
+                (a) => a.name == "Wild Brambleback"
+              );
+
+              result = [];
+              for (const o of distinctSkillGems) {
+                const newGem = {
+                  name: "",
+                  valueLevelOne: 0,
+                  valueLevelFive: 0,
+                  valueLevelSix: 0,
+                  beastCraftProfit: 0,
+                };
+                newGem.name = o;
+                const levelOneGem = skillGemApiFormat.find(
+                  (a) => a.name == o && a.gemLevel == 1
+                );
+                if (levelOneGem) {
+                  newGem.valueLevelOne = levelOneGem.divineValue;
+                } else {
+                  continue;
+                }
+
+                const levelFiveGem = skillGemApiFormat.find(
+                  (a) => a.name == o && a.gemLevel == 5
+                );
+                if (levelFiveGem) {
+                  newGem.valueLevelFive = levelFiveGem.divineValue;
+                } else {
+                  continue;
+                }
+
+                const levelSixGem = skillGemApiFormat.find(
+                  (a) => a.name == o && a.gemLevel == 6
+                );
+                if (levelSixGem) {
+                  newGem.valueLevelSix = levelSixGem.divineValue;
+                } else {
+                  continue;
+                }
+
+                if (
+                  newGem.valueLevelOne != 0 &&
+                  newGem.valueLevelFive != 0 &&
+                  beast
+                ) {
+                  newGem.beastCraftProfit = (
+                    newGem.valueLevelFive -
+                    newGem.valueLevelOne -
+                    4 * beast.divineValue
+                  ).toFixed(2);
+                }
+
+                result.push(newGem);
+              }
+
+              result = result.sort(
+                (a, b) => b.beastCraftProfit - a.beastCraftProfit
+              );
+              return result;
+            },
+            currencyFlipTable() {
+              const filteredCurrencyApi = this.currencyApi.filter(
+                (a) => a.pay && a.pay.listing_count > 25
+              );
+
+              result = [];
+              for (const o of filteredCurrencyApi) {
+                const newRow = {
+                  name: o.currencyTypeName,
+                  buy: "",
+                  sell: "",
+                  listings: o.pay.listing_count,
+                  profit: (o.receive.value - 1 / o.pay.value).toFixed(2),
+                  roi: (
+                    (o.receive.value / (1 / o.pay.value) - 1) *
+                    100
+                  ).toFixed(2),
+                };
+
+                newRow.buy = this.decimalToFraction(
+                  parseFloat((o.pay.value).toFixed(2))
+                );
+
+                newRow.sell = this.decimalToFraction(
+                  parseFloat((o.receive.value).toFixed(2))
+                );
+
+                result.push(newRow);
+              }
+              result = result.sort((a, b) => b.roi - a.roi);
+              return result;
+            },
+            essenceRerollTable() {
+              const result = [];
+              const filteredEssenceApi = this.essenceApi.filter(
+                (a) => a.mapTier == 7
+              );
+              const totalValue = filteredEssenceApi.reduce(
+                (accumulator, item) => accumulator + item.chaosValue,
+                0
+              );
+              const primalLifeforce = this.currencyApi.find((a) => a.currencyTypeName == "Primal Crystallised Lifeforce");
+              const craftValue = primalLifeforce ? 30 * primalLifeforce.receive.value : 1;
+              for(const o of filteredEssenceApi) {
+                const newRow = {
+                  name: o.name,
+                  price: o.chaosValue,
+                  profit: ((totalValue - o.chaosValue) / (filteredEssenceApi.length - 1) - craftValue - o.chaosValue).toFixed(2)
+                }
+                result.push(newRow);
+              }
+              result.sort((a, b) => b.profit - a.profit)
+              return result;
+            },
+          },
+          mounted() {
+            this.getData();
+          },
+        });
+
+        app.mount("#app");
+      }
+    </script>
+  </head>
+  <body onload="init();">
+    <div id="app" class="container">
+      <nav>
+        <div class="nav nav-tabs" id="nav-tab" role="tablist">
+          <button
+            class="nav-link active"
+            id="nav-home-tab"
+            data-bs-toggle="tab"
+            data-bs-target="#nav-awakened-gems"
+            type="button"
+            role="tab"
+            aria-controls="nav-home"
+            aria-selected="true"
+          >
+            Awakened Gems
+          </button>
+          <button
+            class="nav-link"
+            id="nav-profile-tab"
+            data-bs-toggle="tab"
+            data-bs-target="#nav-div-flips"
+            type="button"
+            role="tab"
+            aria-controls="nav-profile"
+            aria-selected="false"
+          >
+            Divination Cards
+          </button>
+          <button
+            class="nav-link"
+            id="nav-contact-tab"
+            data-bs-toggle="tab"
+            data-bs-target="#nav-currency-flips"
+            type="button"
+            role="tab"
+            aria-controls="nav-contact"
+            aria-selected="false"
+          >
+            Currency
+          </button>
+          <button
+            class="nav-link"
+            data-bs-toggle="tab"
+            data-bs-target="#nav-harvest-rerolls"
+            type="button"
+            role="tab"
+          >
+            Rerolls
+          </button>
+        </div>
+      </nav>
+      <div class="tab-content" id="nav-tabContent">
+        <div
+          class="tab-pane fade show active"
+          id="nav-awakened-gems"
+          role="tabpanel"
+          aria-labelledby="nav-home-tab"
+        >
+          <table class="table table-dark table-striped table-hover">
+            <thead>
+              <tr>
+                <th>Gem</th>
+                <th>Level 1</th>
+                <th>Level 5</th>
+                <th>Profit</th>
+                <th>Level 6</th>
+              </tr>
+            </thead>
+            <tbody>
+              <tr v-for="o of skillGemTable">
+                <th>{{ o.name }}</td>
+                <td>{{ o.valueLevelOne }}</td>
+                <td>{{ o.valueLevelFive }}</td>
+                <td>{{ o.beastCraftProfit }}</td>
+                <td>{{ o.valueLevelSix }}</td>
+              </tr>
+            </tbody>
+          </table>
+        </div>
+        <div
+          class="tab-pane fade"
+          id="nav-div-flips"
+          role="tabpanel"
+          aria-labelledby="nav-profile-tab"
+        ></div>
+        <div class="tab-pane fade" id="nav-currency-flips" role="tabpanel">
+          <table class="table table-dark table-striped table-hover">
+            <thead>
+              <tr>
+                <th>Currency</th>
+                <th>Buy</th>
+                <th>Sell</th>
+                <th>Profit</th>
+                <th>ROI</th>
+                <th>Listings</th>
+              </tr>
+            </thead>
+            <tbody>
+              <tr v-for="o of currencyFlipTable">
+                <th>{{ o.name }}</td>
+                <td>{{ o.buy }}</td>
+                <td>{{ o.sell }}</td>
+                <td>{{ o.profit }}</td>
+                <td>{{ o.roi }}%</td>
+                <td>{{ o.listings }}</td>
+              </tr>
+            </tbody>
+          </table>
+        </div>
+        <div class="tab-pane fade" id="nav-harvest-rerolls" role="tabpanel">
+          <table class="table table-dark table-striped table-hover">
+            <thead>
+              <tr>
+                <th>Name</th>
+                <th>Price</th>
+                <th>Profit</th>
+              </tr>
+            </thead>
+            <tbody>
+              <tr v-for="o of essenceRerollTable">
+                <th>{{ o.name }}</td>
+                <td>{{ o.price }}</td>
+                <td>{{ o.profit }}</td>
+              </tr>
+            </tbody>
+          </table>
+        </div>
+      </div>
+    </div>
+  </body>
+</html>
